@@ -44,15 +44,23 @@ python client.py
 ```
 You should see something like:
 ```bash
+± python client.py 
+2025-01-19 17:21:49.484 | INFO     | __main__:<module>:45 - Opened MIDI port Logic Pro Virtual Out
+2025-01-19 17:21:49.484 | INFO     | __main__:<module>:51 - OSC client set up on 127.0.0.1:5005
+2025-01-19 17:21:49.484 | INFO     | __main__:<module>:52 - Sending MIDI messages over OSC channel /midi
 ```
+
+![screenshot](assets/screen_shot_term.png)
+
 
 ## Troubleshooting
 When running `client.py` on the mac, if you see something like:
 ```bash
 ± python client.py
-2025-01-19 17:14:19.139 | WARNING  | __main__:<module>:47 - No MIDI ports available. Make sure that Logic Pro X is open, and t
-hat a recording light was setup:
-Logic Pro X -> Settings -> Control Surfaces -> Setup -> New -> Recording Light
+2025-01-19 17:14:19.139 | WARNING  | __main__:<module>:47 - No MIDI ports available. Make sure
+that Logic Pro X is open, and that a recording light was setup:
+Logic Pro X -> Settings -> Control Surfaces -> Setup -> New
+-> Recording Light
 2025-01-19 17:14:19.139 | INFO     | __main__:<module>:48 - Exiting...
 ```
 Make sure that Logic Pro X is open, and that a recording light was setup.
