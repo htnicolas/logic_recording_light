@@ -8,13 +8,7 @@ What you'll need:
 
 ## Setting up a recording light for Logic Pro X
 
-In Logic Pro X, you can set up a [recording light](https://support.apple.com/guide/logicpro-css/recording-light-setup-ctls73d03c8e/mac) by going to:
-- > `Logic Pro X`
-- > `Settings`
-- > `Control Surfaces`
-- > `Setup`
-- > `New`
-- > `Recording Light`
+In Logic Pro X, you can set up a [recording light](https://support.apple.com/guide/logicpro-css/recording-light-setup-ctls73d03c8e/mac) by going to: `Logic Pro X` > `Settings` > `Control Surfaces` > `Setup` > `New` > `Recording Light`
 
 ## Env Setup (for both rpi and mac)
 ```bash
