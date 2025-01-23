@@ -7,6 +7,12 @@ from pythonosc.dispatcher import Dispatcher
 from pythonosc import osc_server
 from loguru import logger
 
+from LightHandler import RpiGPIO
+
+
+# Light controller
+PIN = 11
+gpio = RpiGPIO(PIN)
 
 def process_midi(midi_data):
     """
@@ -19,8 +25,10 @@ def process_midi(midi_data):
     if data1 == 25:
         if data2 == 127:
             logger.info(f"{midi_data}\tRecording started")
+            gpio.turn_on()
         elif data2 == 0:
             logger.info(f"{midi_data}\tRecording stopped")
+            gpio.turn_off()
 
 def midi_handler(unused_addr, args, *midi_message):
     """
