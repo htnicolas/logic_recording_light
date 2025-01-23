@@ -11,7 +11,7 @@ from LightHandler import RpiGPIO
 
 
 # Light controller
-PIN = 11
+PIN = 16
 gpio = RpiGPIO(PIN)
 
 def process_midi(midi_data):
