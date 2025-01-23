@@ -39,7 +39,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
             "--ip",
-            default="127.0.0.1",
+            default="0.0.0.0", # Listen on all available interfaces
             help="The ip to listen on",
             )
     parser.add_argument(

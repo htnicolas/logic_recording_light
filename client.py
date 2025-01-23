@@ -6,10 +6,10 @@ from loguru import logger
 import rtmidi
 from pythonosc import udp_client
 
-IP_ADDRESS = "127.0.0.1"
+
+IP_ADDRESS = "rpi.lan" # IP address of the RPi connected to the recording light
 PORT = 5005
 client = udp_client.SimpleUDPClient(IP_ADDRESS, PORT)
-
 
 def send_midi_message_over_osc(message, data):
     """

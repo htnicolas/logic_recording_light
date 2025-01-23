@@ -17,6 +17,11 @@ conda activate logic_recording_light
 pip install -r requirements.txt
 ```
 
+On the RPi:
+```bash
+pip install RPi.GPIO
+```
+
 ## Usage
 
 First, run the env set up commands above on both the Raspberry Pi and the mac running Logic Pro X.
