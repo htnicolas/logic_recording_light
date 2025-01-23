@@ -1,10 +1,11 @@
+# A simple class to control a light using a GPIO pin
 import time
 
 from loguru import logger
 import RPi.GPIO as GPIO
 
 
-class RpiGPIO:
+class LightController:
     def __init__(self, pin:int):
         self.pin = pin
         GPIO.setmode(GPIO.BOARD)
@@ -18,11 +19,18 @@ class RpiGPIO:
     def turn_off(self):
         GPIO.output(self.pin, GPIO.LOW)
 
-if __name__ == "__main__":
-    pin = 11
-    gpio = RpiGPIO(pin)
+    def health_check(self):
+        self.turn_off()
+        self.turn_on()
+        time.sleep(1)
+        self.turn_off()
+        logger.info(f"Ready")
 
-    for i in range(5):
+if __name__ == "__main__":
+    pin = 16
+    gpio = LightController(pin)
+
+    for i in range(3):
         print(f"Turning pin {pin} on")
         gpio.turn_on()
         time.sleep(1)

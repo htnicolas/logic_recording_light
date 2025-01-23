@@ -2,17 +2,18 @@
 # To be run on raspberry pi: turn on GPIO pins when recording starts, turn off when recording stops
 
 import argparse
+import time
 
 from pythonosc.dispatcher import Dispatcher
 from pythonosc import osc_server
 from loguru import logger
 
-from LightHandler import RpiGPIO
+from LightController import LightController
 
 
 # Light controller
 PIN = 16
-gpio = RpiGPIO(PIN)
+gpio = LightController(PIN)
 
 def process_midi(midi_data):
     """
@@ -75,5 +76,8 @@ if __name__ == "__main__":
             dispatcher,
             )
     logger.info(f"Listening on {server.server_address}")
+
+    gpio.health_check()
+
     server.serve_forever()
 

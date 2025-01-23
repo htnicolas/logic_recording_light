@@ -33,7 +33,9 @@ python server.py
 You should see something like
 ```
 ± python server.py
-2025-01-19 17:12:55.887 | INFO     | __main__:<module>:69 - Listening on ('127.0.0.1', 5005)
+2025-01-23 14:44:20.648 | INFO     | LightController:__init__:14 - Set pin #16 to OUT in [GPIO.BOARD] mode
+2025-01-23 14:44:20.653 | INFO     | __main__:<module>:78 - Listening on ('0.0.0.0', 5005)
+2025-01-23 14:44:21.654 | INFO     | LightController:health_check:27 - Ready
 ```
 
 ### On the mac running Logic Pro X:
@@ -48,6 +50,9 @@ You should see something like:
 2025-01-19 17:21:49.484 | INFO     | __main__:<module>:51 - OSC client set up on 127.0.0.1:5005
 2025-01-19 17:21:49.484 | INFO     | __main__:<module>:52 - Sending MIDI messages over OSC channel /midi
 ```
+
+### Testing the setup
+In Logic Pro X, start recording by pressing the red button at the top. Your light should turn on.
 
 ![screenshot](assets/screen_shot_term.png)
 
@@ -64,4 +69,28 @@ Logic Pro X -> Settings -> Control Surfaces -> Setup -> New
 ```
 Make sure that Logic Pro X is open, and that a recording light was setup.
 
+
+When running `server.py` on the RPi, if you see something like:
+```bash
+  File "/usr/lib/python3.11/socketserver.py", line 456, in __init__
+    self.server_bind()
+  File "/usr/lib/python3.11/socketserver.py", line 472, in server_bind
+    self.socket.bind(self.server_address)
+OSError: [Errno 98] Address already in use
+```
+This means that you may already have an instance of `server.py` running on the same port (5005 by default).
+To kill that process:
+```bash
+lsof -i :5005
+```
+You'll see something along the lines of:
+```bash
+COMMAND  PID  USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+python  1651 thien    4u  IPv4  10673      0t0  UDP *:5005
+```
+Take note of the PID (1651 in this case) and kill the process with:
+```bash
+kill 1651
+```
+You should be able to run `python server.py` again
 
