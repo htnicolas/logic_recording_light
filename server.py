@@ -15,14 +15,16 @@ from LightController import LightController
 PIN = 16
 gpio = LightController(PIN)
 
-def process_midi(midi_data):
+def process_midi_rec_light(midi_data):
     """
-    Process MIDI data received from OSC
-    Check the MIDI message type and perform actions accordingly.
+    Process MIDI data received from OSC.
+    Check the MIDI message corresponding to the record action in Logic.
+    Trigger the GPIO pin accordingly.
     Args:
         midi_data: List, MIDI message from OSC
     """
     status, data1, data2 = midi_data
+
     if data1 == 25:
         if data2 == 127:
             logger.info(f"{midi_data}\tRecording started")
@@ -31,12 +33,27 @@ def process_midi(midi_data):
             logger.info(f"{midi_data}\tRecording stopped")
             gpio.turn_off()
 
+def process_midi_roland_td07(midi_data):
+    """
+    Process MIDI data received from OSC.
+    Check the MIDI message corresponding to the Roland TD-07 drum kit.
+    Args:
+        midi_data: List, MIDI message from OSC
+    """
+    status, data1, data2 = midi_data
+
+    if data1 == 38: # Snare
+        if status == 153:
+            gpio.turn_on()
+        elif status == 137:
+            gpio.turn_off()
+
 def midi_handler(unused_addr, args, *midi_message):
     """
     Callback function to handle MIDI messages
     Args:
         unused_addr: Unused
-        args: Additional arguments passsed via the dispatcher. Eg process_midi
+        args: Additional arguments passsed via the dispatcher. Eg process_midi_rec_light
         midi_message: MIDI message from OSC, unpacked tuple
     """
     process_func = args[0] # Callable to process MIDI data
@@ -68,7 +85,7 @@ if __name__ == "__main__":
     dispatcher.map(
             args.osc_channel,
             midi_handler,
-            process_midi,
+            process_midi_rec_light,
             )
 
     server = osc_server.ThreadingOSCUDPServer(
