@@ -79,7 +79,7 @@ When running `server.py` on the RPi, if you see something like:
 OSError: [Errno 98] Address already in use
 ```
 This means that you may already have an instance of `server.py` running on the same port (5005 by default).
-To kill that process:
+To kill that process, we need to find the PID of the process:
 ```bash
 lsof -i :5005
 ```
@@ -88,9 +88,10 @@ You'll see something along the lines of:
 COMMAND  PID  USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
 python  1651 thien    4u  IPv4  10673      0t0  UDP *:5005
 ```
+
 Take note of the PID (1651 in this case) and kill the process with:
 ```bash
 kill 1651
 ```
-You should be able to run `python server.py` again
+Now you should be able to run `python server.py` again.
 
