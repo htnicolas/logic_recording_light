@@ -22,6 +22,14 @@ On the RPi:
 pip install RPi.GPIO
 ```
 
+Note: if you don't want to use conda on the rpi and want to use venv instead:
+```bash
+mkdir ~/venvs
+python3 -m venv ~/venvs/logic_recording_light_venv
+source ~/venvs/logic_recording_light_venv/bin/activate
+pip install -r requirements.txt
+```
+
 ## Usage
 
 First, run the env set up commands above on both the Raspberry Pi and the mac running Logic Pro X.
