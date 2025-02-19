@@ -10,6 +10,7 @@ from pythonosc import udp_client
 IP_ADDRESS = "rpi.lan" # IP address of the RPi connected to the recording light
 PORT = 5005
 client = udp_client.SimpleUDPClient(IP_ADDRESS, PORT)
+LOGIC_MIDI_PORT_NAME = "Logic Pro Virtual Out"
 
 def send_midi_message_over_osc(message, data):
     """
@@ -40,9 +41,12 @@ if __name__ == "__main__":
     osc_channel = args.osc_channel
 
     if available_ports:
-        midi_in.open_port(0)
-        midi_in.set_callback(send_midi_message_over_osc, osc_channel)
-        logger.info(f"Opened MIDI port {available_ports[0]}")
+        for idx, port in enumerate(available_ports):
+            logger.info(f"({idx}).\t{port}")
+            if LOGIC_MIDI_PORT_NAME in port:
+                midi_in.open_port(idx)
+                midi_in.set_callback(send_midi_message_over_osc, osc_channel)
+                logger.info(f"Opened MIDI port {available_ports[idx]}")
     else:
         logger.warning("No MIDI ports available. Make sure that Logic Pro X is open, and that a recording light was setup:\nLogic Pro X -> Settings -> Control Surfaces -> Setup -> New -> Recording Light")
         logger.info("Exiting...")
