@@ -1,3 +1,4 @@
 python-osc
 python-rtmidi
 loguru
+obsws-python
