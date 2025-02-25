@@ -1,16 +1,23 @@
 # This program is to be run on the machine running Logic Pro X.
 # To setup recording light, go to Logic Pro X -> Settings -> Control Surfaces -> Setup -> New -> Recording Light
 import argparse
+import socket
 
 from loguru import logger
 import rtmidi
 from pythonosc import udp_client
 
 
-IP_ADDRESS = "rpi.lan" # IP address of the RPi connected to the recording light
+IP_ADDRESS = "rpi.local" # IP address of the RPi connected to the recording light
 PORT = 5005
-client = udp_client.SimpleUDPClient(IP_ADDRESS, PORT)
 LOGIC_MIDI_PORT_NAME = "Logic Pro Virtual Out"
+try:
+    logger.info(f"Connecting to {IP_ADDRESS}:{PORT}")
+    client = udp_client.SimpleUDPClient(IP_ADDRESS, PORT)
+except socket.gaierror:
+    logger.exception(f"Could not connect to IP address {IP_ADDRESS} on port {PORT}.")
+    logger.error("Make sure the RPi is connected to the same network as the machine running Logic Pro X and double-check its hostname.")
+    exit(1)
 
 def send_midi_message_over_osc(message, data):
     """
