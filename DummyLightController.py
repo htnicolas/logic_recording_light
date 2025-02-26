@@ -10,6 +10,7 @@ from LightController import LightController
 class DummyLightController(LightController):
     def __init__(self):
         logger.info("Dummy init")
+        self.health_check()
 
     def turn_on(self, hex_color:str|None=None):
         logger.info("Dummy: turning on")
