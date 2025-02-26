@@ -8,12 +8,12 @@ from pythonosc.dispatcher import Dispatcher
 from pythonosc import osc_server
 from loguru import logger
 
-from LightController import LightController
+from GPIOLightController import GPIOLightController
 
 
 # Light controller
 PIN = 16
-gpio = LightController(PIN)
+gpio = GPIOLightController(PIN)
 
 def process_midi_rec_light(midi_data):
     """
