@@ -8,15 +8,19 @@ import rtmidi
 from pythonosc import udp_client
 
 
-# IP_ADDRESS = "rpi.local" # IP address of the RPi connected to the recording light
-IP_ADDRESS = "0.0.0.0" # IP address of the RPi connected to the recording light
+RPI_HOSTNAME = "rpi.local" # IP address of the RPi connected to the recording light
 PORT = 5005
 LOGIC_MIDI_PORT_NAME = "Logic Pro Virtual Out"
+
 try:
-    logger.info(f"Connecting to {IP_ADDRESS}:{PORT}")
-    client = udp_client.SimpleUDPClient(IP_ADDRESS, PORT)
+    logger.info(f"Connecting to {RPI_HOSTNAME}:{PORT}")
+    rpi_ip = socket.gethostbyname(RPI_HOSTNAME)
+
+    logger.info(f"Resolved hostname {RPI_HOSTNAME} to IP address {rpi_ip}")
+    osc_client = udp_client.SimpleUDPClient(rpi_ip, PORT)
+
 except socket.gaierror:
-    logger.exception(f"Could not connect to IP address {IP_ADDRESS} on port {PORT}.")
+    logger.exception(f"Could not connect to IP from hostname {RPI_HOSTNAME} on port {PORT}.")
     logger.error("Make sure the RPi is connected to the same network as the machine running Logic Pro X and double-check its hostname.")
     exit(1)
 
@@ -29,7 +33,7 @@ def send_midi_message_over_osc(message, data):
     """
     osc_channel = data
     midi_message = message[0] # Ignore timestamp
-    client.send_message(osc_channel, midi_message)
+    osc_client.send_message(osc_channel, midi_message)
     logger.info(f"Sent MIDI message {midi_message} over OSC channel {osc_channel}")
 
 
@@ -60,7 +64,7 @@ if __name__ == "__main__":
         logger.info("Exiting...")
         exit(1)
 
-    logger.info(f"OSC client set up on {IP_ADDRESS}:{PORT}")
+    logger.info(f"OSC client set up with hostname {RPI_HOSTNAME} on port {PORT}")
     logger.info(f"Sending MIDI messages over OSC channel {osc_channel}")
 
     try:
