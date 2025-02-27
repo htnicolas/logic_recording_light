@@ -28,10 +28,10 @@ class OBSController:
 
         try:
             self.cl = obs.ReqClient()
-        except ConnectionRefusedError:
-            logger.error("Could not connect to OBS. Make sure OBS is running and the websocket server is enabled.")
-            logger.error("To enable the websocket server, open OBS -> Tools -> WebSockets Server Settings...")
-            exit(1)
+        except ConnectionRefusedError as e:
+            logger.exception("Could not connect to OBS. Make sure OBS is running and the websocket server is enabled.")
+            logger.exception("To enable the websocket server, open OBS -> Tools -> WebSockets Server Settings...")
+            raise e
         resp = self.cl.get_version()
         logger.info(f"OBS Version: {resp.obs_version}")
 
