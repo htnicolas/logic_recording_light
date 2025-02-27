@@ -8,7 +8,8 @@ import rtmidi
 from pythonosc import udp_client
 
 
-IP_ADDRESS = "rpi.local" # IP address of the RPi connected to the recording light
+# IP_ADDRESS = "rpi.local" # IP address of the RPi connected to the recording light
+IP_ADDRESS = "0.0.0.0" # IP address of the RPi connected to the recording light
 PORT = 5005
 LOGIC_MIDI_PORT_NAME = "Logic Pro Virtual Out"
 try:
