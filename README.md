@@ -53,16 +53,46 @@ python client.py
 ```
 You should see something like:
 ```bash
-± python client.py 
-2025-01-19 17:21:49.484 | INFO     | __main__:<module>:45 - Opened MIDI port Logic Pro Virtual Out
-2025-01-19 17:21:49.484 | INFO     | __main__:<module>:51 - OSC client set up on 127.0.0.1:5005
-2025-01-19 17:21:49.484 | INFO     | __main__:<module>:52 - Sending MIDI messages over OSC channel /midi
+± python client.py  --record_obs
+2025-02-27 13:26:03.183 | INFO     | __main__:<module>:102 - OBS recording control enabled
+2025-02-27 13:26:03.195 | INFO     | OBSController:__init__:36 - OBS Version: 31.0.1
+2025-02-27 13:26:03.195 | INFO     | __main__:create_osc_client:62 - Connecting to rpi.local:5005
+2025-02-27 13:26:03.476 | INFO     | __main__:create_osc_client:65 - Resolved hostname rpi.local to IP address 192.168.40.28
+2025-02-27 13:26:03.478 | INFO     | __main__:<module>:123 - (0).       Logic Pro Virtual Out
+2025-02-27 13:26:03.478 | INFO     | __main__:<module>:127 - Opened MIDI port Logic Pro Virtual Out
+2025-02-27 13:26:03.479 | INFO     | __main__:<module>:133 - OSC client set up with hostname rpi.local on port 5005
+2025-02-27 13:26:03.479 | INFO     | __main__:<module>:134 - Sending MIDI messages over OSC channel /midi
 ```
+
+You can (should!) change the hostname of your rpi with the flag `--rpi_hostname`:
+```bash
+python client.py --rpi_hostname rpi.local
+```
+
+Optionally, if you have [OBS Studio](https://obsproject.com/download) installed on your mac, you can control the video recording status of OBS with the flag `--record_obs`:
+```bash
+python client.py --record_obs
+```
+
+Pressing `record` in Logic Pro X should then:
+- Turn on the light connected to the RPi
+- Start recording in OBS (if `--record_obs` is enabled). Make sure to have OBS open and set up, and make sure to enable  the Websocket Server in OBS: `OBS` > `Tools` > `Websocket Server Settings` > `Enable Websocket Server`
 
 ### Testing the setup
 In Logic Pro X, start recording by pressing the red button at the top. Your light should turn on.
 
 ![screenshot](assets/screen_shot_term.png)
+
+## Running locally
+If you want to run the server and client on the same machine (e.g. for testing), you can run the client to point to localhost:
+```bash
+# Terminal 1
+python client.py --rpi_hostname localhost
+
+# Terminal 2
+python server.py
+```
+In this setup, a Dummy light will be used instead of the recording light controlled by rpi's GPIO.
 
 
 ## Troubleshooting
@@ -75,7 +105,7 @@ Logic Pro X -> Settings -> Control Surfaces -> Setup -> New
 -> Recording Light
 2025-01-19 17:14:19.139 | INFO     | __main__:<module>:48 - Exiting...
 ```
-Make sure that Logic Pro X is open, and that a recording light was setup.
+Make sure that Logic Pro X is open, and that a recording light was setup. Specifically, this code is looking for a Virtual MIDI port called `Logic Pro Virtual Out`.
 
 
 When running `server.py` on the RPi, if you see something like:
