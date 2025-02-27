@@ -8,13 +8,14 @@ import rtmidi
 from pythonosc import udp_client
 
 from OBSController import OBSController
+import midi_states as ms
 
 
 PORT = 5005
 LOGIC_MIDI_PORT_NAME = "Logic Pro Virtual Out"
 
 
-def send_midi_message_over_osc(message:tuple, data_dict:dict):
+def send_midi_message_over_osc(message:tuple, data_dict:dict) -> None:
     """
     Callback function to send MIDI message over OSC
     Args:
@@ -25,9 +26,28 @@ def send_midi_message_over_osc(message:tuple, data_dict:dict):
     obs_controller = data_dict["obs_controller"]
     osc_client = data_dict["osc_client"]
 
-    midi_message = message[0] # Ignore timestamp
+    # import pdb
+    # pdb.set_trace()
+
+    midi_data = message[0] # Ignore timestamp
+
+    # Record video with OBS
+    if obs_controller:
+        midi_action = ms.get_midi_action(midi_data)
+        match midi_action:
+            case ms.MidiActions.RECORD_START:
+                logger.info(f"{midi_data}\tRecording started")
+                obs_controller.start_recording()
+            case ms.MidiActions.RECORD_STOP:
+                logger.info(f"{midi_data}\tRecording stopped")
+                obs_controller.stop_recording()
+            case _:
+                pass
+
+    # Send MIDI message over OSC
     osc_client.send_message(osc_channel, midi_message)
     logger.info(f"Sent MIDI message {midi_message} over OSC channel {osc_channel}")
+    return
 
 def create_osc_client(rpi_hostname:str, port:int) -> udp_client.SimpleUDPClient:
     """
@@ -82,7 +102,7 @@ if __name__ == "__main__":
             logger.info("OBS recording control enabled")
             obs_controller = OBSController()
         except ConnectionRefusedError as e:
-            logger.error("Is OBS running and the websocket server enabled?")
+            logger.error("Is OBS running? And is the OBS websocket server enabled?")
             exit(1)
 
     # Controller for OSC

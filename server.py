@@ -12,6 +12,7 @@ from pythonosc import osc_server
 from loguru import logger
 
 from LightController import LightController
+import midi_states as ms
 if sys.platform == "linux":
     logger.info("Running on Linux, using GPIOLightController")
     from GPIOLightController import GPIOLightController
@@ -23,42 +24,32 @@ elif sys.platform == "darwin":
 
 GPIO_PIN = 16
 
-def process_midi_rec_light(midi_data:list, light_controller:LightController):
+def process_midi_rec_light(
+        midi_data:list,
+        light_controller:LightController,
+        ) -> None:
     """
     Process MIDI data received from OSC.
     Check the MIDI message corresponding to the record action in Logic.
-    Trigger the GPIO pin accordingly.
+    Trigger an action like turning on a light accordingly.
     Args:
-        midi_data: List, MIDI message from OSC
+        midi_data: List, MIDI message from OSC consisting of status,
+                    data1, data2
         light_controller: LightController object to control a light.
-                        Eg GPIOLightController or DummyLightController object
+                    Eg GPIOLightController or DummyLightController object
     """
     status, data1, data2 = midi_data
 
-    if data1 == 25:
-        if data2 == 127:
+    midi_action = ms.get_midi_action(midi_data)
+    match midi_action:
+        case ms.MidiActions.RECORD_START:
             logger.info(f"{midi_data}\tRecording started")
             light_controller.turn_on()
-        elif data2 == 0:
+        case ms.MidiActions.RECORD_STOP:
             logger.info(f"{midi_data}\tRecording stopped")
             light_controller.turn_off()
-
-def process_midi_roland_td07(midi_data: list, light_controller:LightController):
-    """
-    Process MIDI data received from OSC.
-    Check the MIDI message corresponding to the Roland TD-07 drum kit.
-    Args:
-        midi_data: List, MIDI message from OSC
-        light_controller: LightController object to control a light.
-                        Eg GPIOLightController or DummyLightController object
-    """
-    status, data1, data2 = midi_data
-
-    if data1 == 38: # Snare
-        if status == 153:
-            light_controller.turn_on()
-        elif status == 137:
-            light_controller.turn_off()
+        case _:
+            pass
 
 def midi_handler(unused_addr, args, *midi_message):
     """

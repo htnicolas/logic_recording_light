@@ -34,6 +34,7 @@ class OBSController:
             raise e
         resp = self.cl.get_version()
         logger.info(f"OBS Version: {resp.obs_version}")
+        self.is_recording = False
 
     def start_recording(self) -> None:
         """
@@ -41,16 +42,19 @@ class OBSController:
         """
         self.cl.start_record()
         self.tic = time.time()
+        self.is_recording = True
         logger.info("Recording started")
 
     def stop_recording(self) -> None:
         """
         Stop recording in OBS
         """
-        self.cl.stop_record()
-        toc = time.time()
-        logger.info(f"Recording stopped. Recording duration: {toc - self.tic:.2f} seconds")
-        logger.info(f"Output saved to {self.cl.get_record_directory().record_directory}")
+        if self.is_recording:
+            self.cl.stop_record()
+            self.is_recording = False
+            toc = time.time()
+            logger.info(f"Recording stopped. Recording duration: {toc - self.tic:.2f} seconds")
+            logger.info(f"Output saved to {self.cl.get_record_directory().record_directory}")
 
 if __name__ == "__main__":
     obs_controller = OBSController()
