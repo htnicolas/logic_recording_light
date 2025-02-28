@@ -41,12 +41,10 @@ def send_midi_message_over_osc(message:tuple, data_dict:dict) -> None:
             case ms.MidiActions.RECORD_STOP:
                 logger.info(f"{midi_data}\tRecording stopped")
                 obs_controller.stop_recording()
-            case _:
-                pass
 
     # Send MIDI message over OSC
-    osc_client.send_message(osc_channel, midi_message)
-    logger.info(f"Sent MIDI message {midi_message} over OSC channel {osc_channel}")
+    osc_client.send_message(osc_channel, midi_data)
+    logger.info(f"Sent MIDI message {midi_data} over OSC channel {osc_channel}")
     return
 
 def create_osc_client(rpi_hostname:str, port:int) -> udp_client.SimpleUDPClient:
