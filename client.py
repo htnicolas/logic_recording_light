@@ -26,9 +26,6 @@ def send_midi_message_over_osc(message:tuple, data_dict:dict) -> None:
     obs_controller = data_dict["obs_controller"]
     osc_client = data_dict["osc_client"]
 
-    # import pdb
-    # pdb.set_trace()
-
     midi_data = message[0] # Ignore timestamp
 
     # Record video with OBS
