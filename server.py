@@ -48,6 +48,14 @@ def process_midi_rec_light(
         case ms.MidiActions.RECORD_STOP:
             logger.info(f"{midi_data}\tRecording stopped")
             light_controller.turn_off()
+        case ms.MidiActions.PLAY:
+            logger.info(f"{midi_data}\tPlay")
+        case ms.MidiActions.STOP:
+            logger.info(f"{midi_data}\tPause")
+        case ms.MidiActions.TRACK_LEFT:
+            logger.info(f"{midi_data}\tTrack Left")
+        case ms.MidiActions.TRACK_RIGHT:
+            logger.info(f"{midi_data}\tTrack Right")
         case _:
             pass
 
