@@ -53,13 +53,13 @@ def process_midi_rec_light(
         case ms.MidiActions.RECORD_STOP:
             logger.info(f"{midi_data}\tRecording stopped")
             light_controller.turn_off()
-            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
+            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["orange"])
         case ms.MidiActions.PLAY:
             logger.info(f"{midi_data}\tPlay")
             rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["green"])
         case ms.MidiActions.STOP:
             logger.info(f"{midi_data}\tPause")
-            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
+            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["orange"])
         case ms.MidiActions.TRACK_LEFT:
             logger.info(f"{midi_data}\tTrack Left")
         case ms.MidiActions.TRACK_RIGHT:
@@ -122,8 +122,10 @@ if __name__ == "__main__":
     logger.info(f"Listening on {server.server_address}")
 
     light_controller.health_check()
-    rgb_light_controller.health_check()
-    rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
+    # Bug: when going from off to on, the first call to turn_on just switches the light on but
+    # doesn't change the color. Call a 2nd time to actually get the color you want
+    rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["purple"])
+    rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["purple"])
 
     try:
         server.serve_forever()
