@@ -12,6 +12,7 @@ from pythonosc import osc_server
 from loguru import logger
 
 from LightController import LightController
+from DirigeraLightController import DirigeraLightController, COLOR_TO_HEX
 import midi_states as ms
 if sys.platform == "linux":
     logger.info("Running on Linux, using GPIOLightController")
@@ -23,10 +24,12 @@ elif sys.platform == "darwin":
     CommonLightController = DummyLightController
 
 GPIO_PIN = 16
+DIRIGERA_LIGHT_NAME = "recording_light"
 
 def process_midi_rec_light(
         midi_data:list,
         light_controller:LightController,
+        rgb_light_controller:DirigeraLightController
         ) -> None:
     """
     Process MIDI data received from OSC.
@@ -37,6 +40,7 @@ def process_midi_rec_light(
                     data1, data2
         light_controller: LightController object to control a light.
                     Eg GPIOLightController or DummyLightController object
+        rgb_light_controller: DirigeraLightController object to control a RGB light
     """
     status, data1, data2 = midi_data
 
@@ -45,13 +49,17 @@ def process_midi_rec_light(
         case ms.MidiActions.RECORD_START:
             logger.info(f"{midi_data}\tRecording started")
             light_controller.turn_on()
+            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["red"])
         case ms.MidiActions.RECORD_STOP:
             logger.info(f"{midi_data}\tRecording stopped")
             light_controller.turn_off()
+            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
         case ms.MidiActions.PLAY:
             logger.info(f"{midi_data}\tPlay")
+            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["green"])
         case ms.MidiActions.STOP:
             logger.info(f"{midi_data}\tPause")
+            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
         case ms.MidiActions.TRACK_LEFT:
             logger.info(f"{midi_data}\tTrack Left")
         case ms.MidiActions.TRACK_RIGHT:
@@ -94,12 +102,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     light_controller = CommonLightController(GPIO_PIN)
+    rgb_light_controller = DirigeraLightController(DIRIGERA_LIGHT_NAME)
 
     dispatcher = Dispatcher()
     dispatcher.map(
             args.osc_channel,
             midi_handler,
-            partial(process_midi_rec_light, light_controller=light_controller),
+            partial(
+                process_midi_rec_light,
+                light_controller=light_controller,
+                rgb_light_controller=rgb_light_controller,
+                ),
             )
 
     server = osc_server.ThreadingOSCUDPServer(
@@ -109,12 +122,15 @@ if __name__ == "__main__":
     logger.info(f"Listening on {server.server_address}")
 
     light_controller.health_check()
+    rgb_light_controller.health_check()
+    rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
 
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt received, shutting down...")
         light_controller.turn_off()
+        rgb_light_controller.turn_off()
         time.sleep(1)
         logger.info("Exiting...")
         exit(0)
