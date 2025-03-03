@@ -122,10 +122,7 @@ if __name__ == "__main__":
     logger.info(f"Listening on {server.server_address}")
 
     light_controller.health_check()
-    # Bug: when going from off to on, the first call to turn_on just switches the light on but
-    # doesn't change the color. Call a 2nd time to actually get the color you want
-    rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["purple"])
-    rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["purple"])
+    rgb_light_controller.health_check()
 
     try:
         server.serve_forever()

@@ -70,12 +70,12 @@ class DirigeraLightController(LightController):
         Args:
             hex_color: Str, hex color code
         """
-        if hex_color:
-            hue, saturation, value = hex_to_hsv(hex_color)
-            self.light.set_light_level(light_level=value)
-            self.light.set_light_color(hue=hue, saturation=saturation / 100)
         if not self.light.attributes.is_on:
             self.light.set_light(lamp_on=True)
+        if hex_color:
+            hue, saturation, value = hex_to_hsv(hex_color)
+            self.light.set_light_color(hue=hue, saturation=saturation / 100)
+            self.light.set_light_level(light_level=value)
 
     def turn_off(self) -> None:
         self.light.set_light(lamp_on=False)
@@ -83,7 +83,7 @@ class DirigeraLightController(LightController):
     def health_check(self) -> None:
         logger.info(f"Performing health check for Dirigera light {self.light_name}...")
         self.turn_on(hex_color=COLOR_TO_HEX["green"])
-        time.sleep(5)
+        time.sleep(2)
         self.turn_off()
         logger.info("Dirigera light {self.light_name} health check done.")
 
