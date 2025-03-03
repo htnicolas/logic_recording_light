@@ -53,13 +53,13 @@ def process_midi_rec_light(
         case ms.MidiActions.RECORD_STOP:
             logger.info(f"{midi_data}\tRecording stopped")
             light_controller.turn_off()
-            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["orange"])
+            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
         case ms.MidiActions.PLAY:
             logger.info(f"{midi_data}\tPlay")
             rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["green"])
         case ms.MidiActions.STOP:
             logger.info(f"{midi_data}\tPause")
-            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["orange"])
+            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
         case ms.MidiActions.TRACK_LEFT:
             logger.info(f"{midi_data}\tTrack Left")
         case ms.MidiActions.TRACK_RIGHT:

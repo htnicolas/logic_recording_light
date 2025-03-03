@@ -9,14 +9,15 @@ from LightController import LightController
 
 
 COLOR_TO_HEX = {
-    "red": "#FF0000",
-    "green": "#00FF00",
+    "red": "#ff3729",
+    "green": "#47ff88",
     "blue": "#0000FF",
     "yellow": "#FFFF00",
     "cyan": "#00FFFF",
+    "light_blue": "#415966",
     "magenta": "#FF00FF",
     "orange": "#FFA500",
-    "pink": "#FFC0CB",
+    "pink": "#ff758f",
     "purple": "#800080",
     "white": "#FFFFFF",
     }
@@ -66,7 +67,8 @@ class DirigeraLightController(LightController):
 
     def turn_on(self, hex_color: str | None = None) -> None:
         """
-        Turn on the light with the specified hex color
+        Turn on the light with the specified hex color.
+        Note: need to turn the light on first before setting the color or it won't do anything.
         Args:
             hex_color: Str, hex color code
         """
@@ -84,7 +86,7 @@ class DirigeraLightController(LightController):
         logger.info(f"Performing health check for Dirigera light {self.light_name}...")
         self.turn_on(hex_color=COLOR_TO_HEX["green"])
         time.sleep(2)
-        self.turn_off()
+        self.turn_on(hex_color=COLOR_TO_HEX["pink"])
         logger.info("Dirigera light {self.light_name} health check done.")
 
 def hex_to_hsv(hex_color: str) -> tuple[float, float, float]:
