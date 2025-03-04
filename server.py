@@ -12,6 +12,7 @@ from pythonosc import osc_server
 from loguru import logger
 
 from LightController import LightController
+from DirigeraPlugController import DirigeraPlugController
 from DirigeraLightController import DirigeraLightController, COLOR_TO_HEX
 import midi_states as ms
 if sys.platform == "linux":
@@ -29,7 +30,8 @@ DIRIGERA_LIGHT_NAME = "recording_light"
 def process_midi_rec_light(
         midi_data:list,
         light_controller:LightController,
-        rgb_light_controller:DirigeraLightController
+        rgb_light_controller:DirigeraLightController,
+        plug_controller:DirigeraPlugController,
         ) -> None:
     """
     Process MIDI data received from OSC.
@@ -57,9 +59,11 @@ def process_midi_rec_light(
         case ms.MidiActions.PLAY:
             logger.info(f"{midi_data}\tPlay")
             rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["green"])
+            plug_controller.turn_on()
         case ms.MidiActions.STOP:
             logger.info(f"{midi_data}\tPause")
             rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
+            plug_controller.turn_off()
         case ms.MidiActions.TRACK_LEFT:
             logger.info(f"{midi_data}\tTrack Left")
         case ms.MidiActions.TRACK_RIGHT:
@@ -103,6 +107,11 @@ if __name__ == "__main__":
 
     light_controller = CommonLightController(GPIO_PIN)
     rgb_light_controller = DirigeraLightController(DIRIGERA_LIGHT_NAME)
+    disco_plug_controller = DirigeraPlugController("disco")
+
+    light_controller.health_check()
+    rgb_light_controller.health_check()
+    disco_plug_controller.health_check()
 
     dispatcher = Dispatcher()
     dispatcher.map(
@@ -112,6 +121,7 @@ if __name__ == "__main__":
                 process_midi_rec_light,
                 light_controller=light_controller,
                 rgb_light_controller=rgb_light_controller,
+                plug_controller=disco_plug_controller,
                 ),
             )
 
@@ -121,8 +131,6 @@ if __name__ == "__main__":
             )
     logger.info(f"Listening on {server.server_address}")
 
-    light_controller.health_check()
-    rgb_light_controller.health_check()
 
     try:
         server.serve_forever()
@@ -130,6 +138,7 @@ if __name__ == "__main__":
         logger.info("Keyboard interrupt received, shutting down...")
         light_controller.turn_off()
         rgb_light_controller.turn_off()
+        disco_plug_controller.turn_off()
         time.sleep(1)
         logger.info("Exiting...")
         exit(0)
