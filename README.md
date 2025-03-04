@@ -101,6 +101,13 @@ python server.py
 ```
 In this setup, a Dummy light will be used instead of the recording light controlled by rpi's GPIO.
 
+## Optional: Dirigera + Tradfri lights
+This section assumes you have a Dirigera hub and a Tradfri accessory (light bulb, outlet, etc) set up.
+You will need to export the following environment variables:
+```bash
+export DIRIGERA_TOKEN=<your_token>
+export DIRIGERA_IP_ADDRESS=<dirigera_ip_address>
+```
 
 ## Troubleshooting
 When running `client.py` on the mac, if you see something like:
