@@ -1,10 +1,17 @@
 # Recording Light for Logic Pro X
 
+This repo contains the code I'm running in order to automate a few things when recording with Logic Pro X. Eg:
+- Hitting record in Logic Pro X will turn on a light connected to a Raspberry Pi
+- Hitting record in Logic Pro X will start video recording in OBS
+- Hitting record in Logic Pro X will turn my Tradfri lights red. Color changes when recording is paused, or playback is on.
+
 What you'll need:
 - Raspberry Pi with internet access (I'm using a RPi3 rev B)
 - Some kind of LED light / strip expecting 5V
 - A breadboard
 - Some jumper wires
+- OBS Studio
+- Optionally, I'm using a Tradfri RGB light bulb, and a Tradfri outlet.
 
 ## Setting up a recording light for Logic Pro X
 
