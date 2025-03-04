@@ -9,14 +9,14 @@ from LightController import LightController
 
 
 COLOR_TO_HEX = {
-    # "red": "#ff3729",
+    "red": "#ff3729",
     "green": "#47ff88",
-    # "blue": "#0000FF",
-    # "yellow": "#FFFF00",
-    # "cyan": "#00FFFF",
-    # "light_blue": "#1fb0ff",
-    # "magenta": "#FF00FF",
-    # "orange": "#FFA500",
+    "blue": "#0000FF",
+    "yellow": "#FFFF00",
+    "cyan": "#00FFFF",
+    "light_blue": "#1fb0ff",
+    "magenta": "#FF00FF",
+    "orange": "#FFA500",
     "pink": "#ff758f",
     "purple": "#e300e3",
     "white": "#FFFFFF",
