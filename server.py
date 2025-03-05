@@ -30,8 +30,8 @@ DIRIGERA_LIGHT_NAME = "recording_light"
 def process_midi_rec_light(
         midi_data:list,
         light_controller:LightController,
-        rgb_light_controller:DirigeraLightController,
-        plug_controller:DirigeraPlugController,
+        rgb_light_controller:DirigeraLightController=None,
+        plug_controller:DirigeraPlugController=None,
         ) -> None:
     """
     Process MIDI data received from OSC.
@@ -43,6 +43,7 @@ def process_midi_rec_light(
         light_controller: LightController object to control a light.
                     Eg GPIOLightController or DummyLightController object
         rgb_light_controller: DirigeraLightController object to control a RGB light
+        plug_controller: DirigeraPlugController object to control a plug
     """
     status, data1, data2 = midi_data
 
@@ -51,19 +52,25 @@ def process_midi_rec_light(
         case ms.MidiActions.RECORD_START:
             logger.info(f"{midi_data}\tRecording started")
             light_controller.turn_on()
-            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["red"])
+            if rgb_light_controller:
+                rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["red"])
         case ms.MidiActions.RECORD_STOP:
             logger.info(f"{midi_data}\tRecording stopped")
             light_controller.turn_off()
-            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
+            if rgb_light_controller:
+                rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
         case ms.MidiActions.PLAY:
             logger.info(f"{midi_data}\tPlay")
-            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["light_blue"])
-            plug_controller.turn_on()
+            if rgb_light_controller:
+                rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["light_blue"])
+            if plug_controller:
+                plug_controller.turn_on()
         case ms.MidiActions.STOP:
             logger.info(f"{midi_data}\tPause")
-            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
-            plug_controller.turn_off()
+            if rgb_light_controller:
+                rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
+            if plug_controller:
+                plug_controller.turn_off()
         case ms.MidiActions.TRACK_LEFT:
             logger.info(f"{midi_data}\tTrack Left")
         case ms.MidiActions.TRACK_RIGHT:
@@ -106,12 +113,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     light_controller = CommonLightController(GPIO_PIN)
-    rgb_light_controller = DirigeraLightController(DIRIGERA_LIGHT_NAME)
-    disco_plug_controller = DirigeraPlugController("disco")
-
     light_controller.health_check()
-    rgb_light_controller.health_check()
-    disco_plug_controller.health_check()
+    try:
+        rgb_light_controller = DirigeraLightController(DIRIGERA_LIGHT_NAME)
+        rgb_light_controller.health_check()
+
+        disco_plug_controller = DirigeraPlugController("disco")
+        disco_plug_controller.health_check()
+    except Exception as e:
+        # When testing locally, Dirigera controllers may not be available
+        logger.error(f"Error initializing Dirigera controllers: {e}")
+        logger.error("Continuing without RGB light and plug control")
+        rgb_light_controller = None
+        disco_plug_controller = None
 
     dispatcher = Dispatcher()
     dispatcher.map(
@@ -137,8 +151,10 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt received, shutting down...")
         light_controller.turn_off()
-        rgb_light_controller.turn_off()
-        disco_plug_controller.turn_off()
+        if rgb_light_controller:
+            rgb_light_controller.turn_off()
+        if disco_plug_controller:
+            disco_plug_controller.turn_off()
         time.sleep(1)
         logger.info("Exiting...")
         exit(0)

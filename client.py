@@ -13,6 +13,8 @@ import midi_states as ms
 
 PORT = 5005
 LOGIC_MIDI_PORT_NAME = "Logic Pro Virtual Out"
+KEYBOARD_MIDI_PORT_NAME = "MIDI2" # Change this to the name of your MIDI controller
+MIDI_SOURCES = [LOGIC_MIDI_PORT_NAME, KEYBOARD_MIDI_PORT_NAME]
 
 
 def send_midi_message_over_osc(message:tuple, data_dict:dict) -> None:
@@ -27,6 +29,11 @@ def send_midi_message_over_osc(message:tuple, data_dict:dict) -> None:
     osc_client = data_dict["osc_client"]
 
     midi_data = message[0] # Ignore timestamp
+
+    # Make sure it is 3 bytes long
+    if len(midi_data) != 3:
+        logger.warning(f"Invalid MIDI message: {midi_data}")
+        pass
 
     # Record video with OBS
     if obs_controller:
@@ -113,13 +120,25 @@ if __name__ == "__main__":
         "osc_client": osc_client,
     }
 
+    midi_ins = []
+
+    # Loop through available MIDI ports and open the ones we want to listen to MIDI messages on
     if available_ports:
+        logger.info("Available MIDI ports:")
         for idx, port in enumerate(available_ports):
+            # We want to catch MIDI messages from Logic Pro X's virtual MIDI port
+            # We also want to catch MIDI messages from a MIDI controller
+            # Both sources are tied to the same callback function to send MIDI over OSC
             logger.info(f"({idx}).\t{port}")
-            if LOGIC_MIDI_PORT_NAME in port:
-                midi_in.open_port(idx)
-                midi_in.set_callback(send_midi_message_over_osc, callback_data)
-                logger.info(f"Opened MIDI port {available_ports[idx]}")
+
+            for midi_source in MIDI_SOURCES:
+                if midi_source in port:
+                    midi_in = rtmidi.MidiIn()
+                    midi_in.open_port(idx)
+                    midi_in.set_callback(send_midi_message_over_osc, callback_data)
+                    logger.info(f"Opened MIDI port {available_ports[idx]}")
+                    midi_ins.append(midi_in)
+
     else:
         logger.warning("No MIDI ports available. Make sure that Logic Pro X is open, and that a recording light was setup:\nLogic Pro X -> Settings -> Control Surfaces -> Setup -> New -> Recording Light")
         logger.info("Exiting...")
@@ -135,5 +154,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info("Exiting...")
     finally:
-        midi_in.close_port()
+        for midi_in in midi_ins:
+            midi_in.close_port()
         exit(0)

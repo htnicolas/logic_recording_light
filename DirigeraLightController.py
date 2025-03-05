@@ -49,9 +49,8 @@ class DirigeraLightController(LightController):
         except requests.exceptions.ConnectionError as e:
             # Dirigera Hub IP is likely wrong
             logger.exception(e)
-            logger.error(f"Could not connect to Dirigera Hub at {dirigera_ip_address}. Please check the connection.")
+            logger.warning(f"Could not connect to Dirigera Hub at {dirigera_ip_address}. Please check the connection.")
             raise e
-            exit(1)
 
         for light in lights:
             if light.attributes.custom_name == light_name:
