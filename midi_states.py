@@ -23,6 +23,7 @@ class MidiActions(Enum):
 def get_midi_action(midi_data: list) -> MidiActions | None:
     """
     Translate MIDI messages to actions enum.
+    Midi messages may come from various sources, such as LPX virtual MIDI port or a keyboard.
     Args:
         midi_data: List, MIDI message from OSC consisting of status,
                     data1, data2
@@ -31,29 +32,30 @@ def get_midi_action(midi_data: list) -> MidiActions | None:
     """
     status, data1, data2 = midi_data
 
-    # Record button on LPX: 2 25 127 for press, 2 25 0 for release
+    # Record button on Nektar LX61: 16 107 127 for press, 16 107 0 for release
+    # When rec light is set up, LPX Virtual MIDI sends 2 25 127; stopping recording sends 2 25 0
     if data1 == 25:
         if data2 == 127:
             return MidiActions.RECORD_START
         elif data2 == 0:
             return MidiActions.RECORD_STOP
 
-    # Play button on LPX: 16 106 127 for press, 16 106 0 for release
+    # Play button on Nektar LX61: 16 106 127 for press, 16 106 0 for release
     elif data1 == 106:
         if data2 == 127:
             return MidiActions.PLAY
 
-    # Stop button on LPX: 16 105 127 for press, 16 105 0 for release
+    # Stop button on Nektar LX61: 16 105 127 for press, 16 105 0 for release
     elif data1 == 105:
         if data2 == 127:
             return MidiActions.STOP
 
-    # Track Left button on LPX: 16 109 127 for press, 16 109 0 for release
+    # Track Left button on Nektar LX61: 16 109 127 for press, 16 109 0 for release
     elif data1 == 109:
         if data2 == 127:
             return MidiActions.TRACK_LEFT
 
-    # Track Left button on LPX: 16 110 127 for press, 16 110 0 for release
+    # Track Left button on Nektar LX61: 16 110 127 for press, 16 110 0 for release
     elif data1 == 110:
         if data2 == 127:
             return MidiActions.TRACK_RIGHT
