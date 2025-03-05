@@ -58,7 +58,7 @@ def process_midi_rec_light(
             rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
         case ms.MidiActions.PLAY:
             logger.info(f"{midi_data}\tPlay")
-            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["green"])
+            rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["light_blue"])
             plug_controller.turn_on()
         case ms.MidiActions.STOP:
             logger.info(f"{midi_data}\tPause")
