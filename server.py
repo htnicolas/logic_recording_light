@@ -49,32 +49,47 @@ def process_midi_rec_light(
 
     midi_action = ms.get_midi_action(midi_data)
     match midi_action:
+
         case ms.MidiActions.RECORD_START:
             logger.info(f"{midi_data}\tRecording started")
             light_controller.turn_on()
             if rgb_light_controller:
                 rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["red"])
+
         case ms.MidiActions.RECORD_STOP:
             logger.info(f"{midi_data}\tRecording stopped")
             light_controller.turn_off()
             if rgb_light_controller:
                 rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
+
         case ms.MidiActions.PLAY:
             logger.info(f"{midi_data}\tPlay")
             if rgb_light_controller:
                 rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["light_blue"])
             if plug_controller:
                 plug_controller.turn_on()
+
         case ms.MidiActions.STOP:
             logger.info(f"{midi_data}\tPause")
             if rgb_light_controller:
                 rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
             if plug_controller:
                 plug_controller.turn_off()
+
         case ms.MidiActions.TRACK_LEFT:
             logger.info(f"{midi_data}\tTrack Left")
+
         case ms.MidiActions.TRACK_RIGHT:
             logger.info(f"{midi_data}\tTrack Right")
+
+        case ms.MidiActions.TURN_ALL_OFF:
+            # User quit Logic Pro X: turn everything off, server is still running
+            logger.info(f"{midi_data}\tTurn all off")
+            light_controller.turn_off()
+            if rgb_light_controller:
+                rgb_light_controller.turn_off()
+            if plug_controller:
+                plug_controller.turn_off()
         case _:
             pass
 

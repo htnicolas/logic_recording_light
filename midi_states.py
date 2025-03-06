@@ -6,6 +6,8 @@ from enum import Enum
 from loguru import logger
 
 
+CONTROL_CHANGE_STATUS_ALL_CHANNELS = [x for x in range(176, 192)]
+
 class MidiActions(Enum):
     """
     Enum to represent MIDI actions
@@ -18,6 +20,10 @@ class MidiActions(Enum):
     TRACK_RIGHT = "track_right"
     SNARE_ON = "snare_on"
     SNARE_OFF = "snare_off"
+    # To be used when user closes the project in LPX and All Notes Off is sent to external MIDI controller
+    # This assumes that you setup reset messages in LPX to send Control 123 (All Notes Off) and that you have
+    # a MIDI controller that can receive this message
+    ALL_NOTES_OFF = "all_notes_off"
     UNKNOWN = "unknown"
 
 def get_midi_action(midi_data: list) -> MidiActions | None:
@@ -59,6 +65,12 @@ def get_midi_action(midi_data: list) -> MidiActions | None:
     elif data1 == 110:
         if data2 == 127:
             return MidiActions.TRACK_RIGHT
+
+    # You can set LPX to send reset MIDI messages to your controller upon closing the project
+    # Preferences -> MIDI -> Reset Messages -> External MIDI -> Select Control 123 (All Notes Off)
+    elif status in CONTROL_CHANGE_STATUS_ALL_CHANNELS:
+        if data1 == 123 and data2 == 0:
+            return MidiActions.ALL_NOTES_OFF
 
     # Roland TD-07 drum kit snare
     elif data1 == 38:
