@@ -35,16 +35,21 @@ def send_midi_message_over_osc(message:tuple, data_dict:dict) -> None:
         logger.warning(f"Invalid MIDI message: {midi_data}")
         pass
 
-    # Record video with OBS
-    if obs_controller:
-        midi_action = ms.get_midi_action(midi_data)
-        match midi_action:
-            case ms.MidiActions.RECORD_START:
-                logger.info(f"{midi_data}\tRecording started")
+    midi_action = ms.get_midi_action(midi_data)
+    match midi_action:
+        case ms.MidiActions.RECORD_START:
+            # Record video with OBS
+            if obs_controller:
+                logger.info(f"{midi_data}\tStarting OBS recording")
                 obs_controller.start_recording()
-            case ms.MidiActions.RECORD_STOP:
-                logger.info(f"{midi_data}\tRecording stopped")
+        case ms.MidiActions.RECORD_STOP:
+            if obs_controller:
+                logger.info(f"{midi_data}\tStopping OBS recording")
                 obs_controller.stop_recording()
+        case ms.MidiActions.ALL_NOTES_OFF:
+            # Exit the program
+            logger.info(f"{midi_data}\tAll notes off")
+            exit(0)
 
     # Send MIDI message over OSC
     osc_client.send_message(osc_channel, midi_data)

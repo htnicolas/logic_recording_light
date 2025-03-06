@@ -82,7 +82,7 @@ def process_midi_rec_light(
         case ms.MidiActions.TRACK_RIGHT:
             logger.info(f"{midi_data}\tTrack Right")
 
-        case ms.MidiActions.TURN_ALL_OFF:
+        case ms.MidiActions.ALL_NOTES_OFF:
             # User quit Logic Pro X: turn everything off, server is still running
             logger.info(f"{midi_data}\tTurn all off")
             light_controller.turn_off()
@@ -159,6 +159,7 @@ if __name__ == "__main__":
             dispatcher,
             )
     logger.info(f"Listening on {server.server_address}")
+    logger.info("Ready")
 
 
     try:
