@@ -1,5 +1,6 @@
 # This program is to be run on the machine running Logic Pro X.
 # To setup recording light, go to Logic Pro X -> Settings -> Control Surfaces -> Setup -> New -> Recording Light
+import os
 import argparse
 import socket
 
@@ -12,8 +13,8 @@ import midi_states as ms
 
 
 PORT = 5005
-LOGIC_MIDI_PORT_NAME = "Logic Pro Virtual Out"
-KEYBOARD_MIDI_PORT_NAME = "MIDI2" # Change this to the name of your MIDI controller
+LOGIC_MIDI_PORT_NAME = "Logic Pro Virtual Out" # Default name of Logic Pro X's virtual MIDI port
+KEYBOARD_MIDI_PORT_NAME = "Impact LX61+ MIDI2" # Change this to the name of your MIDI controller
 MIDI_SOURCES = [LOGIC_MIDI_PORT_NAME, KEYBOARD_MIDI_PORT_NAME]
 
 
@@ -49,7 +50,8 @@ def send_midi_message_over_osc(message:tuple, data_dict:dict) -> None:
         case ms.MidiActions.ALL_NOTES_OFF:
             # Exit the program
             logger.info(f"{midi_data}\tAll notes off")
-            exit(0)
+            logger.warning("All notes off event received. Exiting...")
+            os._exit(0)
 
     # Send MIDI message over OSC
     osc_client.send_message(osc_channel, midi_data)
