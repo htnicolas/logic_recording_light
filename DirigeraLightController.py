@@ -36,11 +36,11 @@ class DirigeraLightController(LightController):
             logger.error("Please set the environment variables DIRIGERA_TOKEN and DIRIGERA_IP_ADDRESS")
             raise ValueError("Please set the environment variables DIRIGERA_TOKEN and DIRIGERA_IP_ADDRESS")
 
+        logger.info(f"Connecting to Dirigera Hub at {dirigera_ip_address}...")
         self.dirigera_hub = dirigera.Hub(
             token=dirigera_token,
             ip_address=dirigera_ip_address,
         )
-        logger.info(f"Connected to Dirigera Hub at {dirigera_ip_address}")
 
         self.light = None
 

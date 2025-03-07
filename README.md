@@ -1,21 +1,35 @@
 # Recording Light for Logic Pro X
 
-This repo contains the code I'm running in order to automate a few things when recording with Logic Pro X. Eg:
-- Hitting record in Logic Pro X will turn on a light connected to a Raspberry Pi
-- Hitting record in Logic Pro X will start video recording in OBS
-- Hitting record in Logic Pro X will turn my Tradfri lights red. Color changes when recording is paused, or playback is on.
+This repo contains the code I'm running in order to automate a few things when recording with Logic Pro X (LPX). Eg:
+- Hitting record in Logic Pro X will turn on a light connected to a Raspberry Pi, start video recording in OBS, and turn my Tradfri lights red.
+- Hitting play/pause will change the color of my Tradfri bulb
 
 What you'll need:
 - Raspberry Pi with internet access (I'm using a RPi3 rev B)
-- Some kind of LED light / strip expecting 5V
+- Some kind of LED light / strip for the light
+- A relay / optocoupler
 - A breadboard
 - Some jumper wires
 - OBS Studio
+- A MIDI keyboard
 - Optionally, I'm using a Tradfri RGB light bulb, and a Tradfri outlet.
 
-## Setting up a recording light for Logic Pro X
+## Some notes on the setup
+- `client.py` runs on the macbook running Logic Pro X. As of now, it also controls video recording in OBS Studio.
+- `server.py` runs on the Raspberry Pi. It listens for MIDI messages from `client.py` and controls the light connected to the RPi's GPIO, as well as any smart lights/outlets.
+- Quitting LPX will make `client.py` exit. This is by design, since callbacks in `client.py` are tied to MIDI inputs that are available through LPX. When you quit LPX, those MIDI inputs are no longer available, which breaks the callback loop in `client.py`.
 
-In Logic Pro X, you can set up a [recording light](https://support.apple.com/guide/logicpro-css/recording-light-setup-ctls73d03c8e/mac) by going to: `Logic Pro X` > `Settings` > `Control Surfaces` > `Setup` > `New` > `Recording Light`
+## Logic Pro X MIDI settings
+In LPX, 2 things need to be set up:
+
+- Set up a [recording light](https://support.apple.com/guide/logicpro-css/recording-light-setup-ctls73d03c8e/mac) by going to: `Logic Pro X` > `Settings` > `Control Surfaces` > `Setup` > `New` > `Recording Light`
+![screenshot](assets/lpx_rec_light_screenshot.png)
+
+- Set up LPX to send `All Notes Off` messages (CC 123) upon quitting. This message is sent to the external MIDI keyboard, which is then picked up by `client.py` to exit gracefully. To do this, go to: `Preferences` > `MIDI` > `Reset Messages` > Check `All Notes Off` in the External Instrument section.
+![screenshot](assets/reset_messages_screenshot.png)
+
+## OBS Studio settings
+In order to control OBS, we'll make use of its Websocket API. Make sure to have OBS installed, then set it up as follows: enable  the Websocket Server by going to `OBS` > `Tools` > `Websocket Server Settings` > `Enable Websocket Server`
 
 ## Env Setup (for both rpi and mac)
 ```bash
@@ -43,6 +57,7 @@ First, run the env set up commands above on both the Raspberry Pi and the mac ru
 
 ### On the Raspberry Pi:
 ```bash
+# Inside the venv
 python server.py
 ```
 You should see something like
@@ -54,13 +69,16 @@ You should see something like
 ```
 
 ### On the mac running Logic Pro X:
-Open Logic Pro X and create a new project. Then, run the following command:
+- Open 'Logic Pro X' and create a new project.
+- Open and set up [OBS Studio](https://obsproject.com/download). I have it set up to capture HDMI input from a camera.
+
+Then, run the following command:
 ```bash
-python client.py
+python client.py --record_obs
 ```
 You should see something like:
 ```bash
-± python client.py  --record_obs
+± python client.py --record_obs
 2025-02-27 13:26:03.183 | INFO     | __main__:<module>:102 - OBS recording control enabled
 2025-02-27 13:26:03.195 | INFO     | OBSController:__init__:36 - OBS Version: 31.0.1
 2025-02-27 13:26:03.195 | INFO     | __main__:create_osc_client:62 - Connecting to rpi.local:5005
@@ -75,15 +93,13 @@ You can (should!) change the hostname of your rpi with the flag `--rpi_hostname`
 ```bash
 python client.py --rpi_hostname rpi.local
 ```
-
-Optionally, if you have [OBS Studio](https://obsproject.com/download) installed on your mac, you can control the video recording status of OBS with the flag `--record_obs`:
-```bash
-python client.py --record_obs
-```
+If you're testing both server and client locally on your mac, you can set `--rpi_hostname localhost`.
 
 Pressing `record` in Logic Pro X should then:
 - Turn on the light connected to the RPi
-- Start recording in OBS (if `--record_obs` is enabled). Make sure to have OBS open and set up, and make sure to enable  the Websocket Server in OBS: `OBS` > `Tools` > `Websocket Server Settings` > `Enable Websocket Server`
+- Start recording in OBS (if `--record_obs` is enabled). Make sure to have OBS running.
+
+The logs from `client.py` will indicate where the video recording is saved.
 
 ### Testing the setup
 In Logic Pro X, start recording by pressing the red button at the top. Your light should turn on.
@@ -103,7 +119,7 @@ In this setup, a Dummy light will be used instead of the recording light control
 
 ## Optional: Dirigera + Tradfri lights
 This section assumes you have a Dirigera hub and a Tradfri accessory (light bulb, outlet, etc) set up.
-You will need to export the following environment variables:
+You will need to export the following environment variables, which you can obtain by following the setup described in the repo for the [Dirigera module](https://github.com/Leggin/dirigera):
 ```bash
 export DIRIGERA_TOKEN=<your_token>
 export DIRIGERA_IP_ADDRESS=<dirigera_ip_address>

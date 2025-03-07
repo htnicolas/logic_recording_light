@@ -50,6 +50,9 @@ def send_midi_message_over_osc(message:tuple, data_dict:dict) -> None:
         case ms.MidiActions.ALL_NOTES_OFF:
             # Exit the program
             logger.info(f"{midi_data}\tAll notes off")
+            if obs_controller:
+                logger.info(f"{midi_data}\tStopping OBS recording")
+                obs_controller.stop_recording()
             logger.warning("All notes off event received. Exiting...")
             os._exit(0)
 
@@ -128,15 +131,15 @@ if __name__ == "__main__":
     }
 
     midi_ins = []
+    found_midi_sources = {midi_source: False for midi_source in MIDI_SOURCES}
 
     # Loop through available MIDI ports and open the ones we want to listen to MIDI messages on
     if available_ports:
-        logger.info("Available MIDI ports:")
+        logger.info(f"Available MIDI ports: {available_ports}")
         for idx, port in enumerate(available_ports):
             # We want to catch MIDI messages from Logic Pro X's virtual MIDI port
             # We also want to catch MIDI messages from a MIDI controller
             # Both sources are tied to the same callback function to send MIDI over OSC
-            logger.info(f"({idx}).\t{port}")
 
             for midi_source in MIDI_SOURCES:
                 if midi_source in port:
@@ -145,11 +148,17 @@ if __name__ == "__main__":
                     midi_in.set_callback(send_midi_message_over_osc, callback_data)
                     logger.info(f"Opened MIDI port {available_ports[idx]}")
                     midi_ins.append(midi_in)
+                    found_midi_sources[midi_source] = True
 
     else:
         logger.warning("No MIDI ports available. Make sure that Logic Pro X is open, and that a recording light was setup:\nLogic Pro X -> Settings -> Control Surfaces -> Setup -> New -> Recording Light")
         logger.info("Exiting...")
         exit(1)
+
+    # Warn user if any of the MIDI sources were not found
+    for midi_source, found in found_midi_sources.items():
+        if not found:
+            logger.warning(f"Could not find MIDI source '{midi_source}'. Make sure that the MIDI controller is connected and that Logic Pro X is open.")
 
     logger.info(f"OSC client set up with hostname {args.rpi_hostname} on port {PORT}")
     logger.info(f"Sending MIDI messages over OSC channel {args.osc_channel}")

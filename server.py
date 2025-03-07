@@ -138,7 +138,7 @@ if __name__ == "__main__":
     except Exception as e:
         # When testing locally, Dirigera controllers may not be available
         logger.error(f"Error initializing Dirigera controllers: {e}")
-        logger.error("Continuing without RGB light and plug control")
+        logger.error("Processing without Dirigera device control")
         rgb_light_controller = None
         disco_plug_controller = None
 
