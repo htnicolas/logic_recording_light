@@ -14,6 +14,13 @@ What you'll need:
 - A MIDI keyboard
 - Optionally, I'm using a Tradfri RGB light bulb, and a Tradfri outlet.
 
+## Sequence Diagram
+
+To help with the mental model of the various components, here's an overview of the current system as a sequence diagram
+
+![screenshot](assets/sequence_diagram.svg)
+
+
 ## Some notes on the setup
 - `client.py` runs on the macbook running Logic Pro X. As of now, it also controls video recording in OBS Studio.
 - `server.py` runs on the Raspberry Pi. It listens for MIDI messages from `client.py` and controls the light connected to the RPi's GPIO, as well as any smart lights/outlets.
