@@ -48,6 +48,7 @@ def send_midi_message_over_osc(message:tuple, data_dict:dict) -> None:
                 logger.info(f"{midi_data}\tStopping OBS recording")
                 obs_controller.stop_recording()
         case ms.MidiActions.ALL_NOTES_OFF:
+            osc_client.send_message(osc_channel, midi_data)
             # Exit the program
             logger.info(f"{midi_data}\tAll notes off")
             if obs_controller:
@@ -151,7 +152,7 @@ if __name__ == "__main__":
                     found_midi_sources[midi_source] = True
 
     else:
-        logger.warning("No MIDI ports available. Make sure that Logic Pro X is open, and that a recording light was setup:\nLogic Pro X -> Settings -> Control Surfaces -> Setup -> New -> Recording Light")
+        logger.error("No MIDI ports available. Make sure that Logic Pro X is open, and that a recording light was setup:\nLogic Pro X -> Settings -> Control Surfaces -> Setup -> New -> Recording Light")
         logger.info("Exiting...")
         exit(1)
 

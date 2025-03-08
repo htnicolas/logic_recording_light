@@ -137,8 +137,8 @@ if __name__ == "__main__":
         disco_plug_controller.health_check()
     except Exception as e:
         # When testing locally, Dirigera controllers may not be available
-        logger.error(f"Error initializing Dirigera controllers: {e}")
-        logger.error("Processing without Dirigera device control")
+        logger.warning(f"Error initializing Dirigera controllers: {e}")
+        logger.warning("Processing without Dirigera device control")
         rgb_light_controller = None
         disco_plug_controller = None
 
