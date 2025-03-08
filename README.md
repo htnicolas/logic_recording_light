@@ -18,7 +18,7 @@ What you'll need:
 
 To help with the mental model of the various components, here's an overview of the current system as a sequence diagram
 
-![screenshot](assets/sequence_diagram.svg)
+![screenshot](assets/logic_rec_light_seq_diagram.png)
 
 
 ## Some notes on the setup
