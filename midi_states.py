@@ -39,6 +39,16 @@ def get_midi_action(midi_data: list) -> MidiActions | None:
     """
     status, data1, data2 = midi_data
 
+    # You can set LPX to send reset MIDI messages to your controller upon closing the project
+    # Preferences -> MIDI -> Reset Messages -> External MIDI -> Select Control 123 (All Notes Off)
+    if status in CONTROL_CHANGE_STATUS_ALL_CHANNELS:
+        if data1 == 123 and data2 == 0:
+            return MidiActions.ALL_NOTES_OFF
+
+        # CC 121 Reset all controllers to their default. We use this to init server state
+        if data1 == 121 and data2 == 0:
+            return MidiActions.RESET_ALL
+
     # Record button on Nektar LX61: 16 107 127 for press, 16 107 0 for release
     # When rec light is set up, LPX Virtual MIDI sends 2 25 127; stopping recording sends 2 25 0
     if data1 == 25:
@@ -66,16 +76,6 @@ def get_midi_action(midi_data: list) -> MidiActions | None:
     elif data1 == 110:
         if data2 == 127:
             return MidiActions.TRACK_RIGHT
-
-    # You can set LPX to send reset MIDI messages to your controller upon closing the project
-    # Preferences -> MIDI -> Reset Messages -> External MIDI -> Select Control 123 (All Notes Off)
-    elif status in CONTROL_CHANGE_STATUS_ALL_CHANNELS:
-        if data1 == 123 and data2 == 0:
-            return MidiActions.ALL_NOTES_OFF
-
-        # CC 121 Reset all controllers to their default. We use this to init server state
-        if data1 == 121 and data2 == 0:
-            return MidiActions.RESET_ALL
 
     # Roland TD-07 drum kit snare
     elif data1 == 38:
