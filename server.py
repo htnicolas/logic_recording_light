@@ -11,17 +11,17 @@ from pythonosc.dispatcher import Dispatcher
 from pythonosc import osc_server
 from loguru import logger
 
-from LightController import LightController
-from DirigeraPlugController import DirigeraPlugController
-from DirigeraLightController import DirigeraLightController, COLOR_TO_HEX
+from devices.LightController import LightController
+from devices.DirigeraPlugController import DirigeraPlugController
+from devices.DirigeraLightController import DirigeraLightController, COLOR_TO_HEX
 import midi_states as ms
 if sys.platform == "linux":
     logger.info("Running on Linux, using GPIOLightController")
-    from GPIOLightController import GPIOLightController
+    from devices.GPIOLightController import GPIOLightController
     CommonLightController = GPIOLightController
 elif sys.platform == "darwin":
     logger.info("Running on macOS, using DummyLightController")
-    from DummyLightController import DummyLightController
+    from devices.DummyLightController import DummyLightController
     CommonLightController = DummyLightController
 
 GPIO_PIN = 16
@@ -49,6 +49,12 @@ def process_midi_rec_light(
 
     midi_action = ms.get_midi_action(midi_data)
     match midi_action:
+
+        case ms.MidiActions.RESET_ALL:
+            logger.info(f"{midi_data}\tInit")
+            light_controller.health_check()
+            if rgb_light_controller:
+                rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
 
         case ms.MidiActions.RECORD_START:
             logger.info(f"{midi_data}\tRecording started")

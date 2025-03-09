@@ -24,6 +24,7 @@ class MidiActions(Enum):
     # This assumes that you setup reset messages in LPX to send Control 123 (All Notes Off) and that you have
     # a MIDI controller that can receive this message
     ALL_NOTES_OFF = "all_notes_off"
+    RESET_ALL = "reset_all"
     UNKNOWN = "unknown"
 
 def get_midi_action(midi_data: list) -> MidiActions | None:
@@ -71,6 +72,10 @@ def get_midi_action(midi_data: list) -> MidiActions | None:
     elif status in CONTROL_CHANGE_STATUS_ALL_CHANNELS:
         if data1 == 123 and data2 == 0:
             return MidiActions.ALL_NOTES_OFF
+
+        # CC 121 Reset all controllers to their default. We use this to init server state
+        if data1 == 121 and data2 == 0:
+            return MidiActions.RESET_ALL
 
     # Roland TD-07 drum kit snare
     elif data1 == 38:

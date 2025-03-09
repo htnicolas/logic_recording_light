@@ -4,7 +4,7 @@ import os
 import pytest
 
 sys.path.append("..")
-from DirigeraLightController import DirigeraLightController
+from devices.DirigeraLightController import DirigeraLightController
 
 
 class TestDirigeraLightController:

@@ -164,6 +164,10 @@ if __name__ == "__main__":
     logger.info(f"OSC client set up with hostname {args.rpi_hostname} on port {PORT}")
     logger.info(f"Sending MIDI messages over OSC channel {args.osc_channel}")
 
+    # Send reset message to server to init
+    logger.info("Sending reset message to server")
+    osc_client.send_message(args.osc_channel, [176, 121, 0])
+
     try:
         while True:
             # Keep the main thread alive to receive MIDI messages
