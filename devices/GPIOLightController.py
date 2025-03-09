@@ -26,7 +26,7 @@ class GPIOLightController(LightController):
         self.turn_on()
         time.sleep(1)
         self.turn_off()
-        logger.info(f"Ready")
+        logger.info("GPIO light OK")
 
 if __name__ == "__main__":
     pin = 16

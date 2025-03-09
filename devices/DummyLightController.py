@@ -22,7 +22,7 @@ class DummyLightController(LightController):
         self.turn_on()
         time.sleep(1)
         self.turn_off()
-        logger.info(f"Dummy light ready")
+        logger.info(f"Dummy light OK")
 
 if __name__ == "__main__":
     dummy = DummyLightController()

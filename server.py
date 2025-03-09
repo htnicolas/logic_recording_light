@@ -51,10 +51,12 @@ def process_midi_rec_light(
     match midi_action:
 
         case ms.MidiActions.RESET_ALL:
-            logger.info(f"{midi_data}\tInit")
+            logger.info(f"{midi_data}\tInit server state")
             light_controller.health_check()
             if rgb_light_controller:
-                rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
+                rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["orange"])
+            if plug_controller:
+                plug_controller.turn_off()
 
         case ms.MidiActions.RECORD_START:
             logger.info(f"{midi_data}\tRecording started")

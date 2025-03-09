@@ -13,6 +13,7 @@ import midi_states as ms
 
 
 PORT = 5005
+RESET_ALL_MESSAGE = [176, 121, 0] # Reset all controllers to their default
 LOGIC_MIDI_PORT_NAME = "Logic Pro Virtual Out" # Default name of Logic Pro X's virtual MIDI port
 KEYBOARD_MIDI_PORT_NAME = "Impact LX61+ MIDI2" # Change this to the name of your MIDI controller
 MIDI_SOURCES = [LOGIC_MIDI_PORT_NAME, KEYBOARD_MIDI_PORT_NAME]
@@ -164,9 +165,9 @@ if __name__ == "__main__":
     logger.info(f"OSC client set up with hostname {args.rpi_hostname} on port {PORT}")
     logger.info(f"Sending MIDI messages over OSC channel {args.osc_channel}")
 
-    # Send reset message to server to init
+    # Send reset message to server to init state
     logger.info("Sending reset message to server")
-    osc_client.send_message(args.osc_channel, [176, 121, 0])
+    osc_client.send_message(args.osc_channel, RESET_ALL_MESSAGE)
 
     try:
         while True:

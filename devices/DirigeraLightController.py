@@ -84,9 +84,11 @@ class DirigeraLightController(LightController):
     def health_check(self) -> None:
         logger.info(f"Performing health check for Dirigera light {self.light_name}...")
         self.turn_on(hex_color=COLOR_TO_HEX["green"])
-        time.sleep(2)
+        time.sleep(0.5)
         self.turn_on(hex_color=COLOR_TO_HEX["pink"])
-        logger.info("Dirigera light {self.light_name} health check done.")
+        time.sleep(0.5)
+        self.turn_on(hex_color=COLOR_TO_HEX["green"])
+        logger.info(f"Health check: Dirigera light {self.light_name} OK.")
 
 def hex_to_hsv(hex_color: str) -> tuple[float, float, float]:
     """
