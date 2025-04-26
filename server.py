@@ -31,7 +31,8 @@ def process_midi_rec_light(
         midi_data:list,
         light_controller:LightController,
         rgb_light_controller:DirigeraLightController=None,
-        plug_controller:DirigeraPlugController=None,
+        disco_ball_plug:DirigeraPlugController=None,
+        spotlight_plug:DirigeraPlugController=None,
         ) -> None:
     """
     Process MIDI data received from OSC.
@@ -43,7 +44,8 @@ def process_midi_rec_light(
         light_controller: LightController object to control a light.
                     Eg GPIOLightController or DummyLightController object
         rgb_light_controller: DirigeraLightController object to control a RGB light
-        plug_controller: DirigeraPlugController object to control a plug
+        disco_ball_plug: DirigeraPlugController object to control a plug
+        spotlight_plug: DirigeraPlugController object to control a plug
     """
     status, data1, data2 = midi_data
 
@@ -55,8 +57,10 @@ def process_midi_rec_light(
             light_controller.health_check()
             if rgb_light_controller:
                 rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["orange"])
-            if plug_controller:
-                plug_controller.turn_off()
+            if disco_ball_plug:
+                disco_ball_plug.turn_off()
+            if spotlight_plug:
+                spotlight_plug.turn_off()
 
         case ms.MidiActions.RECORD_START:
             logger.info(f"{midi_data}\tRecording started")
@@ -74,15 +78,19 @@ def process_midi_rec_light(
             logger.info(f"{midi_data}\tPlay")
             if rgb_light_controller:
                 rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["light_blue"])
-            if plug_controller:
-                plug_controller.turn_on()
+            if disco_ball_plug:
+                disco_ball_plug.turn_on()
+            if spotlight_plug:
+                spotlight_plug.turn_on()
 
         case ms.MidiActions.STOP:
             logger.info(f"{midi_data}\tPause")
             if rgb_light_controller:
                 rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
-            if plug_controller:
-                plug_controller.turn_off()
+            if disco_ball_plug:
+                disco_ball_plug.turn_off()
+            if spotlight_plug:
+                spotlight_plug.turn_off()
 
         case ms.MidiActions.TRACK_LEFT:
             logger.info(f"{midi_data}\tTrack Left")
@@ -96,8 +104,10 @@ def process_midi_rec_light(
             light_controller.turn_off()
             if rgb_light_controller:
                 rgb_light_controller.turn_off()
-            if plug_controller:
-                plug_controller.turn_off()
+            if disco_ball_plug:
+                disco_ball_plug.turn_off()
+            if spotlight_plug:
+                spotlight_plug.turn_off()
         case _:
             pass
 
@@ -141,8 +151,13 @@ if __name__ == "__main__":
         rgb_light_controller = DirigeraLightController(DIRIGERA_LIGHT_NAME)
         rgb_light_controller.health_check()
 
+        # Disco ball
         disco_plug_controller = DirigeraPlugController("disco")
         disco_plug_controller.health_check()
+
+        # Spotlight
+        spotlight_plug_controller = DirigeraPlugController("Spotlight Plug")
+        spotlight_plug_controller.health_check()
     except Exception as e:
         # When testing locally, Dirigera controllers may not be available
         logger.warning(f"Error initializing Dirigera controllers: {e}")
@@ -158,7 +173,8 @@ if __name__ == "__main__":
                 process_midi_rec_light,
                 light_controller=light_controller,
                 rgb_light_controller=rgb_light_controller,
-                plug_controller=disco_plug_controller,
+                disco_ball_plug=disco_plug_controller,
+                spotlight_plug=spotlight_plug_controller,
                 ),
             )
 
