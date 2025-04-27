@@ -164,6 +164,7 @@ if __name__ == "__main__":
         logger.warning("Processing without Dirigera device control")
         rgb_light_controller = None
         disco_plug_controller = None
+        spotlight_plug_controller = None
 
     dispatcher = Dispatcher()
     dispatcher.map(
@@ -195,6 +196,8 @@ if __name__ == "__main__":
             rgb_light_controller.turn_off()
         if disco_plug_controller:
             disco_plug_controller.turn_off()
+        if spotlight_plug_controller:
+            spotlight_plug_controller.turn_off()
         time.sleep(1)
         logger.info("Exiting...")
         exit(0)
