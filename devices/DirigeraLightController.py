@@ -1,6 +1,7 @@
 import os
 import time
 import requests
+import asyncio
 
 import dirigera
 from loguru import logger
@@ -81,6 +82,21 @@ class DirigeraLightController(LightController):
     def turn_off(self) -> None:
         self.light.set_light(lamp_on=False)
 
+    async def async_turn_on(self, hex_color: str | None = None) -> None:
+        """
+        Turn on the light asynchronously with the specified hex color.
+        Note: need to turn the light on first before setting the color or it won't do anything.
+        Args:
+            hex_color: Str, hex color code
+        """
+        await asyncio.to_thread(self.turn_on, hex_color)
+
+    async def async_turn_off(self) -> None:
+        """
+        Turn off the light asynchronously.
+        """
+        await asyncio.to_thread(self.turn_off)
+
     def health_check(self) -> None:
         logger.info(f"Performing health check for Dirigera light {self.light_name}...")
         self.turn_on(hex_color=COLOR_TO_HEX["green"])
@@ -89,6 +105,64 @@ class DirigeraLightController(LightController):
         time.sleep(0.5)
         self.turn_on(hex_color=COLOR_TO_HEX["green"])
         logger.info(f"Health check: Dirigera light {self.light_name} OK.")
+
+    async def async_health_check(self) -> None:
+        logger.info(f"Performing health check for Dirigera light {self.light_name}...")
+        await self.async_turn_on(hex_color=COLOR_TO_HEX["green"])
+        await asyncio.sleep(0.5)
+        await self.async_turn_on(hex_color=COLOR_TO_HEX["pink"])
+        await asyncio.sleep(0.5)
+        await self.async_turn_on(hex_color=COLOR_TO_HEX["green"])
+        logger.info(f"Health check: Dirigera light {self.light_name} OK.")
+
+
+# Timing comparison functions
+def time_sync_operations(lights: list[DirigeraLightController]) -> float:
+    """
+    Time synchronous operations on a list of smart lights.
+    Returns elapsed time in seconds.
+    """
+    start_time = time.time()
+
+    for light in lights:
+        light.health_check()
+
+    end_time = time.time()
+    return end_time - start_time
+
+
+async def time_async_operations(lights: list[DirigeraLightController]) -> float:
+    """
+    Time asynchronous operations on a list of smart lights.
+    Returns elapsed time in seconds.
+    """
+    start_time = time.time()
+
+    # Create a list of coroutines to execute
+    tasks = [light.async_health_check() for light in lights]
+
+    # Run all health checks concurrently
+    await asyncio.gather(*tasks)
+
+    end_time = time.time()
+    return end_time - start_time
+
+
+async def run_timing_comparison(lights: list[DirigeraLightController]) -> None:
+    """
+    Run and report timing comparison between sync and async operations.
+    """
+    # Time synchronous operations
+    sync_time = time_sync_operations(lights)
+    logger.info(f"Synchronous operation time: {sync_time:.2f} seconds")
+
+    # Time asynchronous operations
+    async_time = await time_async_operations(lights)
+    logger.info(f"Asynchronous operation time: {async_time:.2f} seconds")
+
+    improvement = (sync_time - async_time) / sync_time * 100
+    logger.info(f"Improvement: {improvement:.2f}%")
+    return
 
 def hex_to_hsv(hex_color: str) -> tuple[float, float, float]:
     """
@@ -124,6 +198,9 @@ def hex_to_hsv(hex_color: str) -> tuple[float, float, float]:
 
 if __name__ == "__main__":
     light_controller = DirigeraLightController("recording_light")
+    asyncio.run(run_timing_comparison([light_controller]))
+    exit(0)
+
     light_controller.turn_off()
     light_controller.health_check()
     for color, hex_color in COLOR_TO_HEX.items():

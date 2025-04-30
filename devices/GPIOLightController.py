@@ -1,5 +1,6 @@
 # Will only work on raspberry pi
 import time
+import asyncio
 
 from loguru import logger
 import RPi.GPIO as GPIO
@@ -26,6 +27,20 @@ class GPIOLightController(LightController):
         self.turn_on()
         time.sleep(1)
         self.turn_off()
+        logger.info("GPIO light OK")
+
+    async def async_turn_on(self, hex_color:str|None=None):
+        await asyncio.to_thread(self.turn_on, hex_color)
+
+    async def async_turn_off(self):
+        await asyncio.to_thread(self.turn_off)
+
+    async def async_health_check(self):
+        await asyncio.to_thread(self.turn_off)
+        await asyncio.sleep(1)
+        await asyncio.to_thread(self.turn_on)
+        await asyncio.sleep(1)
+        await asyncio.to_thread(self.turn_off)
         logger.info("GPIO light OK")
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ from pythonosc.dispatcher import Dispatcher
 from pythonosc import osc_server
 from loguru import logger
 
+from AsyncWorker import AsyncWorker
 from devices.LightController import LightController
 from devices.DirigeraPlugController import DirigeraPlugController
 from devices.DirigeraLightController import DirigeraLightController, COLOR_TO_HEX
@@ -30,6 +31,7 @@ DIRIGERA_LIGHT_NAME = "recording_light"
 def process_midi_rec_light(
         midi_data:list,
         light_controller:LightController,
+        async_worker:AsyncWorker,
         rgb_light_controller:DirigeraLightController=None,
         disco_ball_plug:DirigeraPlugController=None,
         spotlight_plug:DirigeraPlugController=None,
@@ -43,6 +45,7 @@ def process_midi_rec_light(
                     data1, data2
         light_controller: LightController object to control a light.
                     Eg GPIOLightController or DummyLightController object
+        async_worker: AsyncWorker object to run async tasks
         rgb_light_controller: DirigeraLightController object to control a RGB light
         disco_ball_plug: DirigeraPlugController object to control a plug
         spotlight_plug: DirigeraPlugController object to control a plug
@@ -54,43 +57,57 @@ def process_midi_rec_light(
 
         case ms.MidiActions.RESET_ALL:
             logger.info(f"{midi_data}\tInit server state")
-            light_controller.health_check()
+            async_worker.run_task(
+                    light_controller.async_health_check()
+                    )
             if rgb_light_controller:
-                rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["orange"])
+                async_worker.run_task(
+                        rgb_light_controller.async_turn_on(hex_color=COLOR_TO_HEX["orange"])
+                        )
             if disco_ball_plug:
-                disco_ball_plug.turn_off()
+                async_worker.run_task(disco_ball_plug.async_turn_off())
             if spotlight_plug:
-                spotlight_plug.turn_off()
+                async_worker.run_task(spotlight_plug.async_turn_off())
 
         case ms.MidiActions.RECORD_START:
             logger.info(f"{midi_data}\tRecording started")
-            light_controller.turn_on()
+            async_worker.run_task(
+                    light_controller.async_turn_on()
+                    )
             if rgb_light_controller:
-                rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["red"])
+                async_worker.run_task(
+                        rgb_light_controller.async_turn_on(hex_color=COLOR_TO_HEX["red"])
+                        )
 
         case ms.MidiActions.RECORD_STOP:
             logger.info(f"{midi_data}\tRecording stopped")
-            light_controller.turn_off()
+            async_worker.run_task(light_controller.async_turn_off())
             if rgb_light_controller:
-                rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
+                async_worker.run_task(
+                        rgb_light_controller.async_turn_on(hex_color=COLOR_TO_HEX["pink"])
+                        )
 
         case ms.MidiActions.PLAY:
             logger.info(f"{midi_data}\tPlay")
             if rgb_light_controller:
-                rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["light_blue"])
+                async_worker.run_task(
+                        rgb_light_controller.async_turn_on(hex_color=COLOR_TO_HEX["light_blue"])
+                        )
             if disco_ball_plug:
-                disco_ball_plug.turn_on()
+                async_worker.run_task(disco_ball_plug.async_turn_on())
             if spotlight_plug:
-                spotlight_plug.turn_on()
+                async_worker.run_task(spotlight_plug.async_turn_on())
 
         case ms.MidiActions.STOP:
             logger.info(f"{midi_data}\tPause")
             if rgb_light_controller:
-                rgb_light_controller.turn_on(hex_color=COLOR_TO_HEX["pink"])
+                async_worker.run_task(
+                        rgb_light_controller.async_turn_on(hex_color=COLOR_TO_HEX["pink"])
+                        )
             if disco_ball_plug:
-                disco_ball_plug.turn_off()
+                async_worker.run_task(disco_ball_plug.async_turn_off())
             if spotlight_plug:
-                spotlight_plug.turn_off()
+                async_worker.run_task(spotlight_plug.async_turn_off())
 
         case ms.MidiActions.TRACK_LEFT:
             logger.info(f"{midi_data}\tTrack Left")
@@ -101,11 +118,13 @@ def process_midi_rec_light(
         case ms.MidiActions.ALL_NOTES_OFF:
             # User quit Logic Pro X: turn everything off, server is still running
             logger.info(f"{midi_data}\tTurn all off")
-            light_controller.turn_off()
+            async_worker.run_task(light_controller.async_turn_off())
             if rgb_light_controller:
-                rgb_light_controller.turn_off()
+                async_worker.run_task(
+                        rgb_light_controller.async_turn_off()
+                        )
             if disco_ball_plug:
-                disco_ball_plug.turn_off()
+                async_worker.run_task(disco_ball_plug.async_turn_off())
             if spotlight_plug:
                 spotlight_plug.turn_off()
         case _:
@@ -145,19 +164,26 @@ if __name__ == "__main__":
             )
     args = parser.parse_args()
 
+    async_worker = AsyncWorker()
     light_controller = CommonLightController(GPIO_PIN)
-    light_controller.health_check()
+    async_worker.run_task(light_controller.async_health_check())
     try:
         rgb_light_controller = DirigeraLightController(DIRIGERA_LIGHT_NAME)
-        rgb_light_controller.health_check()
+        async_worker.run_task(
+                rgb_light_controller.async_health_check()
+                )
 
         # Disco ball
         disco_plug_controller = DirigeraPlugController("disco")
-        disco_plug_controller.health_check()
+        async_worker.run_task(
+                disco_plug_controller.async_health_check()
+                )
 
         # Spotlight
         spotlight_plug_controller = DirigeraPlugController("Spotlight Plug")
-        spotlight_plug_controller.health_check()
+        async_worker.run_task(
+                spotlight_plug_controller.async_health_check()
+                )
     except Exception as e:
         # When testing locally, Dirigera controllers may not be available
         logger.warning(f"Error initializing Dirigera controllers: {e}")
@@ -172,6 +198,7 @@ if __name__ == "__main__":
             midi_handler,
             partial(
                 process_midi_rec_light,
+                async_worker=async_worker,
                 light_controller=light_controller,
                 rgb_light_controller=rgb_light_controller,
                 disco_ball_plug=disco_plug_controller,
@@ -191,13 +218,13 @@ if __name__ == "__main__":
         server.serve_forever()
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt received, shutting down...")
-        light_controller.turn_off()
+        async_worker.run_task(light_controller.async_turn_off())
         if rgb_light_controller:
-            rgb_light_controller.turn_off()
+            async_worker.run_task(rgb_light_controller.async_turn_off())
         if disco_plug_controller:
-            disco_plug_controller.turn_off()
+            async_worker.run_task(disco_plug_controller.async_turn_off())
         if spotlight_plug_controller:
-            spotlight_plug_controller.turn_off()
+            async_worker.run_task(spotlight_plug_controller.async_turn_off())
         time.sleep(1)
         logger.info("Exiting...")
         exit(0)
