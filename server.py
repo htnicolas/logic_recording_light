@@ -91,7 +91,7 @@ def process_midi_rec_light(
             logger.info(f"{midi_data}\tPlay")
             if rgb_light_controller:
                 async_worker.run_task(
-                        rgb_light_controller.async_turn_on(hex_color=COLOR_TO_HEX["light_blue"])
+                        rgb_light_controller.async_turn_on(hex_color=COLOR_TO_HEX["dark_green"])
                         )
             if disco_ball_plug:
                 async_worker.run_task(disco_ball_plug.async_turn_on())
