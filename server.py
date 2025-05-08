@@ -64,10 +64,10 @@ def process_midi_rec_light(
                 async_worker.run_task(
                         rgb_light_controller.async_turn_on(hex_color=COLOR_TO_HEX["orange"])
                         )
-            if disco_ball_plug:
-                async_worker.run_task(disco_ball_plug.async_turn_off())
             if spotlight_plug:
                 async_worker.run_task(spotlight_plug.async_turn_off())
+            if disco_ball_plug:
+                async_worker.run_task(disco_ball_plug.async_turn_off())
 
         case ms.MidiActions.RECORD_START:
             logger.info(f"{midi_data}\tRecording started")
@@ -93,10 +93,10 @@ def process_midi_rec_light(
                 async_worker.run_task(
                         rgb_light_controller.async_turn_on(hex_color=COLOR_TO_HEX["dark_green"])
                         )
-            if disco_ball_plug:
-                async_worker.run_task(disco_ball_plug.async_turn_on())
             if spotlight_plug:
                 async_worker.run_task(spotlight_plug.async_turn_on())
+            if disco_ball_plug:
+                async_worker.run_task(disco_ball_plug.async_turn_on())
 
         case ms.MidiActions.STOP:
             logger.info(f"{midi_data}\tPause")
@@ -104,10 +104,10 @@ def process_midi_rec_light(
                 async_worker.run_task(
                         rgb_light_controller.async_turn_on(hex_color=COLOR_TO_HEX["pink"])
                         )
-            if disco_ball_plug:
-                async_worker.run_task(disco_ball_plug.async_turn_off())
             if spotlight_plug:
                 async_worker.run_task(spotlight_plug.async_turn_off())
+            if disco_ball_plug:
+                async_worker.run_task(disco_ball_plug.async_turn_off())
 
         case ms.MidiActions.TRACK_LEFT:
             logger.info(f"{midi_data}\tTrack Left")
@@ -173,13 +173,13 @@ if __name__ == "__main__":
                 rgb_light_controller.async_health_check()
                 )
 
-        # Disco ball
+        # Frekvens light
         disco_plug_controller = DirigeraPlugController("disco")
         async_worker.run_task(
                 disco_plug_controller.async_health_check()
                 )
 
-        # Spotlight
+        # Spotlight + disco ball
         spotlight_plug_controller = DirigeraPlugController("Spotlight Plug")
         async_worker.run_task(
                 spotlight_plug_controller.async_health_check()
