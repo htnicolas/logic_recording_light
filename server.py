@@ -33,7 +33,7 @@ def process_midi_rec_light(
         light_controller:LightController,
         async_worker:AsyncWorker,
         rgb_light_controller:DirigeraLightController=None,
-        disco_ball_plug:DirigeraPlugController=None,
+        sunset_lights_plug:DirigeraPlugController=None,
         spotlight_plug:DirigeraPlugController=None,
         ) -> None:
     """
@@ -47,7 +47,7 @@ def process_midi_rec_light(
                     Eg GPIOLightController or DummyLightController object
         async_worker: AsyncWorker object to run async tasks
         rgb_light_controller: DirigeraLightController object to control a RGB light
-        disco_ball_plug: DirigeraPlugController object to control a plug
+        sunset_lights_plug: DirigeraPlugController object to control a plug
         spotlight_plug: DirigeraPlugController object to control a plug
     """
     status, data1, data2 = midi_data
@@ -66,8 +66,8 @@ def process_midi_rec_light(
                         )
             if spotlight_plug:
                 async_worker.run_task(spotlight_plug.async_turn_off())
-            if disco_ball_plug:
-                async_worker.run_task(disco_ball_plug.async_turn_off())
+            if sunset_lights_plug:
+                async_worker.run_task(sunset_lights_plug.async_turn_on())
 
         case ms.MidiActions.RECORD_START:
             logger.info(f"{midi_data}\tRecording started")
@@ -78,6 +78,8 @@ def process_midi_rec_light(
                 async_worker.run_task(
                         rgb_light_controller.async_turn_on(hex_color=COLOR_TO_HEX["red"])
                         )
+            if sunset_lights_plug:
+                async_worker.run_task(sunset_lights_plug.async_turn_on())
 
         case ms.MidiActions.RECORD_STOP:
             logger.info(f"{midi_data}\tRecording stopped")
@@ -95,8 +97,8 @@ def process_midi_rec_light(
                         )
             if spotlight_plug:
                 async_worker.run_task(spotlight_plug.async_turn_on())
-            if disco_ball_plug:
-                async_worker.run_task(disco_ball_plug.async_turn_on())
+            if sunset_lights_plug:
+                async_worker.run_task(sunset_lights_plug.async_turn_off())
 
         case ms.MidiActions.STOP:
             logger.info(f"{midi_data}\tPause")
@@ -106,8 +108,8 @@ def process_midi_rec_light(
                         )
             if spotlight_plug:
                 async_worker.run_task(spotlight_plug.async_turn_off())
-            if disco_ball_plug:
-                async_worker.run_task(disco_ball_plug.async_turn_off())
+            if sunset_lights_plug:
+                async_worker.run_task(sunset_lights_plug.async_turn_on())
 
         case ms.MidiActions.TRACK_LEFT:
             logger.info(f"{midi_data}\tTrack Left")
@@ -123,8 +125,8 @@ def process_midi_rec_light(
                 async_worker.run_task(
                         rgb_light_controller.async_turn_off()
                         )
-            if disco_ball_plug:
-                async_worker.run_task(disco_ball_plug.async_turn_off())
+            if sunset_lights_plug:
+                async_worker.run_task(sunset_lights_plug.async_turn_off())
             if spotlight_plug:
                 spotlight_plug.turn_off()
         case _:
@@ -173,10 +175,10 @@ if __name__ == "__main__":
                 rgb_light_controller.async_health_check()
                 )
 
-        # Frekvens light
-        disco_plug_controller = DirigeraPlugController("disco")
+        # Sunset lights
+        sunset_lights_plug_controller = DirigeraPlugController("Sunset Lights", start_on=True)
         async_worker.run_task(
-                disco_plug_controller.async_health_check()
+                sunset_lights_plug_controller.async_health_check()
                 )
 
         # Spotlight + disco ball
@@ -189,7 +191,7 @@ if __name__ == "__main__":
         logger.warning(f"Error initializing Dirigera controllers: {e}")
         logger.warning("Processing without Dirigera device control")
         rgb_light_controller = None
-        disco_plug_controller = None
+        sunset_lights_plug_controller = None
         spotlight_plug_controller = None
 
     dispatcher = Dispatcher()
@@ -201,7 +203,7 @@ if __name__ == "__main__":
                 async_worker=async_worker,
                 light_controller=light_controller,
                 rgb_light_controller=rgb_light_controller,
-                disco_ball_plug=disco_plug_controller,
+                sunset_lights_plug=sunset_lights_plug_controller,
                 spotlight_plug=spotlight_plug_controller,
                 ),
             )
@@ -221,8 +223,8 @@ if __name__ == "__main__":
         async_worker.run_task(light_controller.async_turn_off())
         if rgb_light_controller:
             async_worker.run_task(rgb_light_controller.async_turn_off())
-        if disco_plug_controller:
-            async_worker.run_task(disco_plug_controller.async_turn_off())
+        if sunset_lights_plug_controller:
+            async_worker.run_task(sunset_lights_plug_controller.async_turn_off())
         if spotlight_plug_controller:
             async_worker.run_task(spotlight_plug_controller.async_turn_off())
         time.sleep(1)

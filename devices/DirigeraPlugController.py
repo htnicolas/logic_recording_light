@@ -11,7 +11,7 @@ from devices.LightController import LightController
 
 
 class DirigeraPlugController(LightController):
-    def __init__(self, plug_name: str):
+    def __init__(self, plug_name: str, start_on: bool = False):
         """
         Args:
             plug_name: Name of the plug to control, e.g. "disco_ball".
@@ -52,7 +52,12 @@ class DirigeraPlugController(LightController):
             raise ValueError(f"No Dirigera-enabled plug with name '{plug_name}' found")
 
         self.plug_name = plug_name
-        self.plug.set_startup_behaviour(behaviour=StartupEnum.START_OFF)
+
+        # Set startup behaviour
+        if start_on:
+            self.plug.set_startup_behaviour(behaviour=StartupEnum.START_ON)
+        else:
+            self.plug.set_startup_behaviour(behaviour=StartupEnum.START_OFF)
 
     def turn_on(self) -> None:
         """
@@ -145,7 +150,7 @@ async def run_timing_comparison(lights: list[DirigeraPlugController]) -> None:
 
 
 if __name__ == "__main__":
-    plug_controller = DirigeraPlugController("disco")
+    plug_controller = DirigeraPlugController("Sunset Lights", start_on=True)
     spotlight_plug_controller = DirigeraPlugController("Spotlight Plug")
 
     lights = [plug_controller, spotlight_plug_controller]
